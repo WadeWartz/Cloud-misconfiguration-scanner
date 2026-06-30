@@ -1,0 +1,13 @@
+# Python virtual environment
+venv/
+.venv/
+__pycache__/
+*.pyc
+
+# AWS credentials / local configs 
+.aws/
+*.pem
+.env
+
+# VS Code config
+.vscode/
