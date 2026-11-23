@@ -1,0 +1,120 @@
+rules:
+  # ==================== S3 Rules ====================
+  - id: S3-001
+    service: s3
+    title: S3 Block Public Access Disabled
+    severity: HIGH
+    enabled: true
+    description: >-
+      S3 bucket does not have all four Block Public Access settings enabled
+      (BlockPublicAcls, IgnorePublicAcls, BlockPublicPolicy, RestrictPublicBuckets).
+    remediation: >-
+      Enable all four S3 Block Public Access settings at the bucket or account level.
+
+  - id: S3-002
+    service: s3
+    title: S3 Bucket Policy Allows Public Access
+    severity: CRITICAL
+    enabled: true
+    description: >-
+      S3 bucket policy contains an Allow statement with a wildcard Principal ("*")
+      without restricting conditions.
+    remediation: >-
+      Restrict the bucket policy Principal to specific AWS accounts, IAM roles,
+      or add strict Condition blocks.
+
+  - id: S3-003
+    service: s3
+    title: S3 Default Encryption Disabled
+    severity: MEDIUM
+    enabled: true
+    description: >-
+      S3 bucket does not have default server-side encryption (SSE-S3 or SSE-KMS) configured.
+    remediation: >-
+      Enable default server-side encryption (SSE-S3 or AWS KMS) on the S3 bucket.
+
+  - id: S3-004
+    service: s3
+    title: S3 Versioning Disabled
+    severity: LOW
+    enabled: true
+    description: >-
+      S3 bucket versioning is not enabled, increasing the risk of accidental deletion
+      or overwrite.
+    remediation: >-
+      Enable bucket versioning on the S3 bucket.
+
+  # ==================== IAM Rules ====================
+  - id: IAM-001
+    service: iam
+    title: Root Account MFA Disabled
+    severity: CRITICAL
+    enabled: true
+    description: >-
+      The AWS root account does not have Multi-Factor Authentication (MFA) enabled.
+    remediation: >-
+      Enable hardware or virtual MFA for the AWS root account immediately.
+
+  - id: IAM-002
+    service: iam
+    title: IAM Access Key Older Than Threshold
+    severity: HIGH
+    enabled: true
+    description: >-
+      An active IAM user access key has not been rotated within the allowed age threshold.
+    remediation: >-
+      Rotate and deactivate IAM access keys older than 90 days; prefer IAM roles over
+      long-lived keys.
+    params:
+      max_key_age_days: 90
+
+  - id: IAM-003
+    service: iam
+    title: Overly Permissive IAM Policy (*:*)
+    severity: CRITICAL
+    enabled: true
+    description: >-
+      An attached customer-managed IAM policy grants full administrative privileges
+      (Effect: Allow, Action: "*", Resource: "*").
+    remediation: >-
+      Apply the principle of least privilege by scoping Action and Resource to only
+      what is required.
+
+  # ==================== EC2 Rules ====================
+  - id: EC2-001
+    service: ec2
+    title: Security Group Allows Unrestricted Access to Sensitive Ports
+    severity: HIGH
+    enabled: true
+    description: >-
+      An EC2 Security Group allows inbound traffic from 0.0.0.0/0 or ::/0 on sensitive
+      administrative ports (e.g., SSH 22, RDP 3389).
+    remediation: >-
+      Restrict inbound rules on sensitive ports to trusted CIDR blocks or use AWS Systems
+      Manager Session Manager.
+    params:
+      sensitive_ports:
+        - 22
+        - 3389
+
+  - id: EC2-002
+    service: ec2
+    title: Unencrypted EBS Volume
+    severity: MEDIUM
+    enabled: true
+    description: >-
+      An EBS volume is not encrypted at rest.
+    remediation: >-
+      Enable EBS encryption by default in the region and migrate unencrypted volumes
+      via encrypted snapshots.
+
+  - id: EC2-003
+    service: ec2
+    title: EC2 Instance Does Not Enforce IMDSv2
+    severity: MEDIUM
+    enabled: true
+    description: >-
+      An EC2 instance allows IMDSv1 (HttpTokens is not set to "required"), increasing
+      exposure to SSRF credential theft.
+    remediation: >-
+      Configure Instance Metadata Options with HttpTokens=required (IMDSv2).
